@@ -166,52 +166,52 @@ pdf.alias_nb_pages()
 
 # ====================== COVER PAGE ======================================
 pdf.add_page()
-# Dark indigo cover background
+# Deep indigo cover background
 pdf.set_fill_color(*ReportPDF.COVER_TOP)
 pdf.rect(0, 0, 210, 297, "F")
-# Lighter accent strip
+
+# Lighter accent strip at bottom
 pdf.set_fill_color(*ReportPDF.COVER_BOT)
-pdf.rect(0, 160, 210, 137, "F")
+pdf.rect(0, 220, 210, 77, "F")
 
-# Decorative circle
-pdf.set_fill_color(79, 70, 200)
-pdf.ellipse(130, -30, 120, 120, "F")
-pdf.set_fill_color(99, 102, 241)
-pdf.ellipse(-20, 200, 80, 80, "F")
+# Visual Elements - Circles and Lines
+pdf.set_fill_color(79, 70, 229) # Removed the alpha parameter to fix the error
+pdf.ellipse(140, -40, 150, 150, "F")
+pdf.set_fill_color(67, 56, 202)
+pdf.ellipse(-30, 230, 100, 100, "F")
 
-# Shield icon area
-pdf.set_fill_color(255, 255, 255)
-pdf.ellipse(85, 45, 40, 40, "F")
-pdf.set_font("Helvetica", "B", 24)
-pdf.set_text_color(*ReportPDF.PRIMARY)
-pdf.set_xy(85, 53)
-pdf.cell(40, 24, "FN", align="C")
-
-# Title
-pdf.ln(50)
-pdf.set_y(100)
-pdf.set_font("Helvetica", "B", 34)
+# Project Title and Subtitle
+pdf.set_y(80)
+pdf.set_font("Helvetica", "B", 42)
 pdf.set_text_color(*ReportPDF.WHITE)
-pdf.cell(0, 14, "Fake News Detection", align="C")
-pdf.ln(16)
-pdf.set_font("Helvetica", "", 15)
-pdf.set_text_color(200, 210, 255)
-pdf.cell(0, 10, "AI-Powered News Verification System", align="C")
-pdf.ln(30)
+pdf.cell(0, 18, "FAKE NEWS", align="C")
+pdf.ln(18)
+pdf.cell(0, 18, "DETECTION", align="C")
+pdf.ln(25)
 
-# Info block on cover
-pdf.set_font("Helvetica", "", 10)
+pdf.set_font("Helvetica", "", 18)
+pdf.set_text_color(210, 214, 255)
+pdf.cell(0, 10, "AI-Powered Verification System", align="C")
+pdf.ln(45)
+
+# Detailed Project Report - Refined
+pdf.set_font("Helvetica", "B", 12)
 pdf.set_text_color(*ReportPDF.WHITE)
-pdf.cell(0, 7, "Detailed Project Report", align="C")
-pdf.ln(7)
-pdf.cell(0, 7, f"Generated on {datetime.now().strftime('%B %d, %Y at %I:%M %p')}", align="C")
-pdf.ln(20)
+pdf.cell(0, 8, "DETAILED PROJECT REPORT", align="C")
+pdf.ln(12)
 
-# Tech badges
-pdf.set_font("Helvetica", "B", 9)
-pdf.set_text_color(200, 210, 255)
-badges = ["Python", "Flask", "Scikit-Learn", "TF-IDF", "Logistic Regression"]
-badge_text = "   |   ".join(badges)
+# Horizontal line on cover
+pdf.set_draw_color(255, 255, 255)
+pdf.set_line_width(0.8)
+pdf.line(75, pdf.get_y(), 135, pdf.get_y())
+pdf.ln(35)
+
+# Tech badges at the bottom
+pdf.set_y(245)
+pdf.set_font("Helvetica", "B", 10)
+pdf.set_text_color(238, 242, 255)
+badges = ["PYTHON", "FLASK", "SCIKIT-LEARN", "TF-IDF", "LOGISTIC REGRESSION"]
+badge_text = "  |  ".join(badges)
 pdf.cell(0, 8, badge_text, align="C")
 
 # ====================== PAGE 2+ =========================================
