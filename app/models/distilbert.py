@@ -1,10 +1,10 @@
 import os
 from transformers import pipeline
 
-MODEL_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "distilbert_model")
-MODEL_DIR = os.path.abspath(MODEL_DIR)
+# Pulling the model directly from the Hugging Face Hub!
+HF_MODEL_ID = "deepak002p/FakeNews-DistilBERT"
 
-classifier = pipeline("text-classification", model=MODEL_DIR)
+classifier = pipeline("text-classification", model=HF_MODEL_ID)
 
 LABEL_MAP = {
     "LABEL_0": "Fake",
