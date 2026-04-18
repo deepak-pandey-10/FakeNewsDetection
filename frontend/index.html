@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TruthGuard AI | Enterprise Fact verification</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    
+    <!-- Top Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i class="fa-solid fa-shield-check brand-icon"></i>
+                <span class="brand-text">TruthGuard Enterprise AI</span>
+            </div>
+            <div class="nav-links">
+                <a href="#" class="active">Analysis</a>
+                <a href="#">History</a>
+                <a href="#">API Docs</a>
+                <div class="user-profile">
+                    <span>Analyst</span>
+                    <div class="avatar">A</div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <h3>Verification Tools</h3>
+                <ul>
+                    <li class="active" id="tab-text"><i class="fa-solid fa-align-left"></i> Text Analysis</li>
+                    <li id="tab-url"><i class="fa-solid fa-link"></i> URL Scanner</li>
+                    <li><i class="fa-solid fa-file-pdf"></i> Document Scan <span class="badge">PRO</span></li>
+                </ul>
+            </div>
+            <div class="sidebar-section">
+                <h3>System Status</h3>
+                <div class="status-indicator">
+                    <span class="dot online"></span>
+                    <span>DistilBERT Engine Responding</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="workspace">
+            <div class="container">
+                
+                <header class="page-header">
+                    <h1>Fact Verification</h1>
+                    <p>Enter text or a URL below to cross-reference claims against trusted sources and our ML models.</p>
+                </header>
+
+                <div class="panel input-panel">
+                    <form id="analyze-form">
+                        <div class="input-controls">
+                            <!-- Text Input -->
+                            <div id="text-input-group" class="form-group">
+                                <label for="text">Content to Analyze</label>
+                                <textarea id="text" placeholder="Enter claims, news excerpts, or statements..." rows="6"></textarea>
+                                <div class="form-hint">Supports up to 512 tokens. Plain text only.</div>
+                            </div>
+                            
+                            <!-- URL Input -->
+                            <div id="url-input-group" class="form-group hidden">
+                                <label for="url">Article URL</label>
+                                <div class="url-wrapper">
+                                    <span class="url-protocol">https://</span>
+                                    <input type="url" id="url" placeholder="example.com/article">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" id="submit-btn" class="btn btn-primary">
+                                <i class="fa-solid fa-microchip"></i>
+                                Start AI Analysis
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Processing State -->
+                <div id="loading" class="panel loading-panel hidden">
+                    <div class="loader-header">
+                        <div class="spinner"></div>
+                        <h3>Processing Request...</h3>
+                    </div>
+                    <div class="log-console">
+                        <div class="log-line">Initializing sequence classification...</div>
+                        <div class="log-line">Tokenizing input text...</div>
+                        <div class="log-line">Running DistilBERT inference (attention layer mapping)...</div>
+                        <div class="log-line">Querying trusted source databases...</div>
+                        <div class="log-line pending">Synthesizing final verdict... <span class="cursor">_</span></div>
+                    </div>
+                </div>
+
+                <!-- Error State -->
+                <div id="error-container" class="alert alert-danger hidden">
+                    <i class="fa-solid fa-circle-exclamation alert-icon"></i>
+                    <div class="alert-content">
+                        <h4>Analysis Failed</h4>
+                        <p id="error-message">Connection timed out.</p>
+                    </div>
+                </div>
+
+                <!-- Results Dashboard -->
+                <div id="results" class="results-dashboard hidden">
+                    <div class="dashboard-header">
+                        <h2>Analysis Report</h2>
+                        <button class="btn btn-secondary btn-sm"><i class="fa-solid fa-download"></i> Export PDF</button>
+                    </div>
+
+                    <div class="grid-stats">
+                        <!-- Final Verdict -->
+                        <div class="stat-card">
+                            <div class="stat-label">System Verdict</div>
+                            <div class="verdict-banner" id="verdict-badge">
+                                <!-- JS injected -->
+                            </div>
+                        </div>
+                        
+                        <!-- Confidence -->
+                        <div class="stat-card">
+                            <div class="stat-label">Model Confidence</div>
+                            <div class="confidence-meter">
+                                <div class="meter-track">
+                                    <div class="meter-fill" id="conf-bar" style="width: 0%"></div>
+                                </div>
+                                <div class="meter-value" id="conf-text">0%</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid-details">
+                        <!-- Evidence Panel -->
+                        <div class="panel evidence-panel">
+                            <div class="panel-header">
+                                <h3>Corroborating Evidence</h3>
+                                <span class="badge" id="evidence-count">0 Sources</span>
+                            </div>
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Source Domain</th>
+                                            <th>Headline Match</th>
+                                            <th>Credibility</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="evidence-list">
+                                        <!-- JS Additions -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
