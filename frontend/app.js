@@ -2,8 +2,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Nav/Tabs
     const tabText = document.getElementById('tab-text');
     const tabUrl = document.getElementById('tab-url');
+    const tabDoc = document.getElementById('tab-doc');
     const textGroup = document.getElementById('text-input-group');
     const urlGroup = document.getElementById('url-input-group');
+    const docGroup = document.getElementById('doc-input-group');
     
     // UI Panels
     const form = document.getElementById('analyze-form');
@@ -20,39 +22,76 @@ document.addEventListener('DOMContentLoaded', () => {
     const evidenceList = document.getElementById('evidence-list');
     const evidenceCount = document.getElementById('evidence-count');
 
+    // History Nodes
+    const historyLink = document.getElementById('history-link');
+    const historyPanel = document.getElementById('history-panel');
+    const closeHistoryBtn = document.getElementById('close-history');
+    const clearHistoryBtn = document.getElementById('clear-history');
+    const historyList = document.getElementById('history-list');
+
+    // Export PDF
+    const exportPdfBtn = document.getElementById('export-pdf-btn');
+    exportPdfBtn.addEventListener('click', () => {
+        window.print();
+    });
+
     let activeTab = 'text';
 
     // Interactions
-    tabText.addEventListener('click', () => {
-        activeTab = 'text';
-        tabText.classList.add('active');
+    function resetTabs() {
+        tabText.classList.remove('active');
         tabUrl.classList.remove('active');
-        textGroup.classList.remove('hidden');
+        tabDoc.classList.remove('active');
+        textGroup.classList.add('hidden');
         urlGroup.classList.add('hidden');
+        docGroup.classList.add('hidden');
+    }
+
+    tabText.addEventListener('click', () => {
+        resetTabs(); activeTab = 'text';
+        tabText.classList.add('active'); textGroup.classList.remove('hidden');
     });
 
     tabUrl.addEventListener('click', () => {
-        activeTab = 'url';
-        tabUrl.classList.add('active');
-        tabText.classList.remove('active');
-        urlGroup.classList.remove('hidden');
-        textGroup.classList.add('hidden');
+        resetTabs(); activeTab = 'url';
+        tabUrl.classList.add('active'); urlGroup.classList.remove('hidden');
+    });
+
+    tabDoc.addEventListener('click', () => {
+        resetTabs(); activeTab = 'doc';
+        tabDoc.classList.add('active'); docGroup.classList.remove('hidden');
     });
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        // Payload
-        let payload = {};
+        let endpoint = '/api/analyze';
+        let bodyPayload = null;
+        let isFormData = false;
+        let historyTitle = "";
+
         if (activeTab === 'text') {
             const text = document.getElementById('text').value;
             if (!text.trim()) return;
-            payload = { text };
-        } else {
-            const url = document.getElementById('url').value;
+            bodyPayload = JSON.stringify({ text });
+            historyTitle = text.substring(0, 40) + "...";
+        } else if (activeTab === 'url') {
+            let url = document.getElementById('url').value;
             if (!url.trim()) return;
-            // The HTML prefix has 'https://' as a label, we prepend if missing
-            payload = { url: url.startsWith('http') ? url : `https://${url}` };
+            url = url.startsWith('http') ? url : `https://${url}`;
+            bodyPayload = JSON.stringify({ url });
+            historyTitle = url;
+        } else {
+            // PDF Document
+            const fileInput = document.getElementById('file');
+            if (fileInput.files.length === 0) return;
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append("file", file);
+            bodyPayload = formData;
+            isFormData = true;
+            endpoint = '/api/analyze-file';
+            historyTitle = "Document: " + file.name;
         }
 
         // Reset
@@ -64,18 +103,22 @@ document.addEventListener('DOMContentLoaded', () => {
         startLogAnimation();
 
         try {
-            const response = await fetch('/api/analyze', {
+            const headers = {};
+            if (!isFormData) headers['Content-Type'] = 'application/json';
+
+            const response = await fetch(endpoint, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+                headers: headers,
+                body: bodyPayload
             });
             const data = await response.json();
 
             if (!response.ok || data.error) {
-                throw new Error(data.error || 'Network response was not ok');
+                throw new Error(data.error || data.detail || 'Network response was not ok');
             }
 
             renderDashboard(data);
+            saveToHistory(historyTitle, data.prediction);
 
         } catch (err) {
             errorMsg.textContent = err.message;
@@ -153,4 +196,53 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     }
+
+    // --- History Logic ---
+
+    function loadHistory() {
+        const hist = JSON.parse(localStorage.getItem('truthguardHistory') || '[]');
+        historyList.innerHTML = '';
+        if(hist.length === 0) {
+            historyList.innerHTML = '<li style="color:var(--text-muted);font-size:12px;">No past analyses.</li>';
+        } else {
+            hist.forEach(item => {
+                const li = document.createElement('li');
+                const vColor = item.prediction.includes('Real') ? 'var(--status-success)' : item.prediction.includes('Fake') ? 'var(--status-error)' : 'var(--status-warning)';
+                li.innerHTML = `
+                    <div style="font-weight:500;margin-bottom:4px;word-break:break-all;">${item.title}</div>
+                    <div style="display:flex;justify-content:space-between;font-size:12px;">
+                        <span style="color:${vColor}">${item.prediction}</span>
+                        <span style="color:var(--text-muted)">${new Date(item.date).toLocaleTimeString()}</span>
+                    </div>
+                `;
+                historyList.appendChild(li);
+            });
+        }
+    }
+
+    function saveToHistory(title, prediction) {
+        const hist = JSON.parse(localStorage.getItem('truthguardHistory') || '[]');
+        hist.unshift({ title, prediction, date: new Date().toISOString() });
+        if(hist.length > 10) hist.pop(); // keep last 10
+        localStorage.setItem('truthguardHistory', JSON.stringify(hist));
+        loadHistory();
+    }
+
+    historyLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        historyPanel.classList.remove('hidden');
+        loadHistory();
+    });
+
+    closeHistoryBtn.addEventListener('click', () => {
+        historyPanel.classList.add('hidden');
+    });
+
+    clearHistoryBtn.addEventListener('click', () => {
+        localStorage.removeItem('truthguardHistory');
+        loadHistory();
+    });
+
+    // Init history on load
+    loadHistory();
 });

@@ -21,8 +21,8 @@
             </div>
             <div class="nav-links">
                 <a href="#" class="active">Analysis</a>
-                <a href="#">History</a>
-                <a href="#">API Docs</a>
+                <a href="#" id="history-link">History</a>
+                <a href="/docs" target="_blank">API Docs</a>
                 <div class="user-profile">
                     <span>Analyst</span>
                     <div class="avatar">A</div>
@@ -39,7 +39,7 @@
                 <ul>
                     <li class="active" id="tab-text"><i class="fa-solid fa-align-left"></i> Text Analysis</li>
                     <li id="tab-url"><i class="fa-solid fa-link"></i> URL Scanner</li>
-                    <li><i class="fa-solid fa-file-pdf"></i> Document Scan <span class="badge">PRO</span></li>
+                    <li id="tab-doc"><i class="fa-solid fa-file-pdf"></i> Document Scan</li>
                 </ul>
             </div>
             <div class="sidebar-section">
@@ -77,6 +77,13 @@
                                     <span class="url-protocol">https://</span>
                                     <input type="url" id="url" placeholder="example.com/article">
                                 </div>
+                            </div>
+                            
+                            <!-- File Input -->
+                            <div id="doc-input-group" class="form-group hidden">
+                                <label for="file">Upload Document</label>
+                                <input type="file" id="file" accept=".pdf" style="padding: 10px; background: var(--bg-surface);">
+                                <div class="form-hint">Supports PDF files for text extraction.</div>
                             </div>
                         </div>
 
@@ -117,7 +124,7 @@
                 <div id="results" class="results-dashboard hidden">
                     <div class="dashboard-header">
                         <h2>Analysis Report</h2>
-                        <button class="btn btn-secondary btn-sm"><i class="fa-solid fa-download"></i> Export PDF</button>
+                        <button id="export-pdf-btn" class="btn btn-secondary btn-sm"><i class="fa-solid fa-download"></i> Export PDF</button>
                     </div>
 
                     <div class="grid-stats">
@@ -169,6 +176,20 @@
 
             </div>
         </main>
+    </div>
+
+    <!-- History Panel -->
+    <div id="history-panel" class="history-panel hidden">
+        <div class="history-header">
+            <h3>Analysis History</h3>
+            <button id="close-history" class="btn btn-secondary btn-sm"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="history-content">
+            <ul id="history-list">
+                <!-- JS Populated -->
+            </ul>
+            <button id="clear-history" class="btn btn-secondary btn-sm" style="width: 100%; margin-top: 15px;">Clear History</button>
+        </div>
     </div>
 
     <script src="/static/app.js"></script>

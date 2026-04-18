@@ -252,7 +252,7 @@ ul { list-style: none; }
     margin-top: 6px;
 }
 
-textarea, input {
+textarea, input:not([type="file"]) {
     width: 100%;
     background-color: var(--bg-base);
     border: 1px solid var(--border-strong);
@@ -264,7 +264,7 @@ textarea, input {
     transition: border-color 0.2s;
 }
 
-textarea:focus, input:focus {
+textarea:focus, input:not([type="file"]):focus {
     outline: none;
     border-color: var(--brand-primary);
 }
@@ -520,3 +520,88 @@ textarea:focus, input:focus {
 .cred-low::before { background-color: var(--status-error); }
 
 .hidden { display: none !important; }
+
+/* History Panel Styling */
+.history-panel {
+    position: fixed;
+    top: 60px; /* Below navbar */
+    right: 0;
+    width: 320px;
+    height: calc(100vh - 60px);
+    background-color: var(--bg-surface);
+    border-left: 1px solid var(--border-strong);
+    box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+    z-index: 900;
+    display: flex;
+    flex-direction: column;
+}
+
+.history-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-subtle);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 16px;
+    color: var(--text-primary);
+}
+
+.history-content {
+    padding: 20px;
+    flex: 1;
+    overflow-y: auto;
+}
+
+#history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+#history-list li {
+    background: var(--bg-base);
+    border: 1px solid var(--border-subtle);
+    padding: 12px;
+    border-radius: var(--radius-md);
+}
+
+/* Print CSS */
+@media print {
+    body {
+        background-color: white !important;
+        color: black !important;
+        font-family: Arial, sans-serif !important;
+    }
+    
+    .navbar, .sidebar, .input-panel, #loading, #error-container, #export-pdf-btn, #history-panel {
+        display: none !important;
+    }
+
+    .main-layout { display: block; }
+    .workspace { padding: 0 !important; background-color: white !important; }
+
+    .results-dashboard {
+        display: block !important;
+    }
+
+    .stat-card, .evidence-panel {
+        background: transparent !important;
+        border: 1px solid #ccc !important;
+        color: black !important;
+    }
+
+    .stat-label, .log-console {
+        color: #333 !important;
+    }
+    
+    .data-table th, .data-table td {
+        border-color: #ddd !important;
+        color: black !important;
+    }
+    
+    h1, h2, h3, h4, .btn {
+        color: black !important;
+    }
+
+    .meter-track { background-color: #eee !important; border: none; }
+}
