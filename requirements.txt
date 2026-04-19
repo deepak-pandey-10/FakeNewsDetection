@@ -8,3 +8,5 @@ requests
 huggingface_hub
 pypdf>=3.17.0
 python-multipart>=0.0.9
+python-dotenv
+google-genai
