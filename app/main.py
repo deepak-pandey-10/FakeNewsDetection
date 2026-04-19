@@ -2,9 +2,13 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 import os
+from dotenv import load_dotenv
 from app.routes.analyze import router
 
-app = FastAPI(title="Fake News Agent")
+# Load API Keys from .env
+load_dotenv()
+
+app = FastAPI(title="Intelligent News Monitor")
 
 # Mount frontend directory for static assets
 FRONTEND_DIR = os.path.join(os.path.dirname(__file__), "..", "frontend")
