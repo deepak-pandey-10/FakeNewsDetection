@@ -98,11 +98,46 @@ document.addEventListener('DOMContentLoaded', () => {
     newsBtn.addEventListener('click', () => triggerAnalysis('news'));
 
     async function triggerAnalysis(mode) {
-        const textValue = textInput.value;
-        if (!textValue.trim()) {
-            textInput.style.borderColor = 'var(--danger)';
-            setTimeout(() => textInput.style.borderColor = '', 2000);
-            return;
+        const activeTab = document.querySelector('.sidebar-section li.active').id;
+        
+        let fetchUrl = '/api/analyze';
+        let options = { method: 'POST' };
+        let historyLabel = '';
+
+        if (activeTab === 'tab-text') {
+            const textValue = document.getElementById('text').value;
+            if (!textValue.trim()) {
+                textInput.style.borderColor = 'var(--danger)';
+                setTimeout(() => textInput.style.borderColor = '', 2000);
+                return;
+            }
+            historyLabel = textValue;
+            options.headers = { 'Content-Type': 'application/json' };
+            options.body = JSON.stringify({ text: textValue, mode: mode });
+        } else if (activeTab === 'tab-url') {
+            const urlValue = document.getElementById('url').value;
+            if (!urlValue.trim()) {
+                document.getElementById('url').style.borderColor = 'var(--danger)';
+                setTimeout(() => document.getElementById('url').style.borderColor = '', 2000);
+                return;
+            }
+            const fullUrl = urlValue.startsWith('http') ? urlValue : 'https://' + urlValue;
+            historyLabel = fullUrl;
+            options.headers = { 'Content-Type': 'application/json' };
+            options.body = JSON.stringify({ url: fullUrl, mode: mode });
+        } else if (activeTab === 'tab-doc') {
+            const fileInput = document.getElementById('file');
+            if (!fileInput.files.length) {
+                fileInput.style.borderColor = 'var(--danger)';
+                setTimeout(() => fileInput.style.borderColor = '', 2000);
+                return;
+            }
+            fetchUrl = '/api/analyze-file';
+            historyLabel = fileInput.files[0].name;
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            options.body = formData;
+            // Native fetch will auto-set the correct Content-Type for FormData
         }
 
         // Reset UI
@@ -113,16 +148,12 @@ document.addEventListener('DOMContentLoaded', () => {
         newsBtn.disabled = true;
 
         try {
-            const response = await fetch('/api/analyze', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text: textValue, mode: mode })
-            });
+            const response = await fetch(fetchUrl, options);
             const data = await response.json();
 
             if (!response.ok || data.error) throw new Error(data.error || 'Request failed');
 
-            saveToHistory(textValue, data);
+            saveToHistory(historyLabel, data);
             renderReport(data, mode);
         } catch (err) {
             errorMsg.textContent = err.message;
