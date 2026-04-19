@@ -1,3 +1,12 @@
+---
+title: TruthGuard AI Fake News Detection
+emoji: 🕵️
+colorFrom: indigo
+colorTo: purple
+sdk: docker
+pinned: false
+app_port: 7860
+---
 # Fake News Detection Agent
 
 AI-powered agent that combines a **fine-tuned DistilBert** classifier with web retrieval and multi-step reasoning to detect fake news.
