@@ -13,8 +13,9 @@ router = APIRouter()
 async def analyze_news(data: dict):
     input_text = data.get("text")
     url = data.get("url")
+    mode = data.get("mode", "both")
 
-    result = await run_agent(input_text, url)
+    result = await run_agent(input_text, url, mode=mode)
     return result
 
 @router.post("/analyze-file")

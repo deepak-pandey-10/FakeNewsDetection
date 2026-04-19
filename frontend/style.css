@@ -404,7 +404,7 @@ textarea:focus, input:not([type="file"]):focus {
 
 .grid-stats {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(3, 1fr);
     gap: 24px;
     margin-bottom: 24px;
 }
@@ -605,3 +605,15 @@ textarea:focus, input:not([type="file"]):focus {
 
     .meter-track { background-color: #eee !important; border: none; }
 }
+
+/* Dual Action Buttons */
+.form-actions-dual {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 24px;
+}
+.fact-mode { border-color: rgba(59, 130, 246, 0.4) !important; background: rgba(59, 130, 246, 0.05) !important; }
+.news-mode { border-color: rgba(16, 185, 129, 0.4) !important; background: rgba(16, 185, 129, 0.05) !important; }
+.fact-mode:hover { background: rgba(59, 130, 246, 0.1) !important; color: white !important; }
+.news-mode:hover { background: rgba(16, 185, 129, 0.1) !important; color: white !important; }
