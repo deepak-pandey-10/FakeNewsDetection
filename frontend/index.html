@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TruthGuard AI | Enterprise Fact verification</title>
+    <title>TruthGuard AI | Enterprise Fact Verification</title>
+    <meta name="description" content="AI-powered fact verification using DistilBERT and Gemini for real-time news analysis.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -46,7 +47,11 @@
                 <h3>System Status</h3>
                 <div class="status-indicator">
                     <span class="dot online"></span>
-                    <span>DistilBERT Engine Responding</span>
+                    <span>DistilBERT Engine Online</span>
+                </div>
+                <div class="status-indicator">
+                    <span class="dot online"></span>
+                    <span>Gemini Agent Online</span>
                 </div>
             </div>
         </aside>
@@ -122,64 +127,107 @@
                     </div>
                 </div>
 
-                <!-- Results Dashboard -->
+                <!-- ═══════════════ Results Dashboard ═══════════════ -->
                 <div id="results" class="results-dashboard hidden">
-                    <div class="dashboard-header">
-                        <h2>Analysis Report</h2>
-                        <button id="export-pdf-btn" class="btn btn-secondary btn-sm"><i class="fa-solid fa-download"></i> Export PDF</button>
+                    
+                    <!-- Hero Verdict Card -->
+                    <div class="verdict-hero" id="verdict-hero">
+                        <div class="verdict-icon-wrap" id="verdict-icon-wrap">
+                            <i class="fa-solid fa-circle-check" id="verdict-icon"></i>
+                        </div>
+                        <div class="verdict-hero-content">
+                            <div class="verdict-label" id="verdict-label">VERIFIED</div>
+                            <div class="verdict-summary" id="verdict-summary">This claim appears to be accurate.</div>
+                        </div>
+                        <div class="verdict-timestamp" id="verdict-timestamp"></div>
                     </div>
 
-                    <div class="grid-stats">
-                        <!-- News Verification -->
-                        <div class="stat-card">
-                            <div class="stat-label">News Verification (ML)</div>
-                            <div class="verdict-banner" id="news-verdict-badge">
-                                <!-- JS injected -->
+                    <!-- Stats Row -->
+                    <div class="stats-row">
+                        <!-- Confidence Gauge -->
+                        <div class="stat-card-v2">
+                            <div class="stat-card-header">
+                                <i class="fa-solid fa-gauge-high"></i>
+                                <span>Model Confidence</span>
                             </div>
+                            <div class="gauge-container">
+                                <svg class="gauge-svg" viewBox="0 0 120 70">
+                                    <path class="gauge-bg" d="M 10 65 A 50 50 0 0 1 110 65" />
+                                    <path class="gauge-fill" id="gauge-fill" d="M 10 65 A 50 50 0 0 1 110 65" />
+                                </svg>
+                                <div class="gauge-value" id="gauge-value">0%</div>
+                            </div>
+                            <div class="stat-detail" id="conf-label">Awaiting analysis...</div>
                         </div>
 
-                        <!-- Fact Verification -->
-                        <div class="stat-card">
-                            <div class="stat-label">Fact Verification (Agent)</div>
-                            <div class="verdict-banner" id="fact-verdict-badge">
-                                <!-- JS injected -->
+                        <!-- ML Prediction -->
+                        <div class="stat-card-v2">
+                            <div class="stat-card-header">
+                                <i class="fa-solid fa-microchip"></i>
+                                <span>ML Prediction</span>
                             </div>
-                        </div>
-                        
-                        <!-- Confidence -->
-                        <div class="stat-card">
-                            <div class="stat-label">Model Confidence</div>
-                            <div class="confidence-meter">
-                                <div class="meter-track">
-                                    <div class="meter-fill" id="conf-bar" style="width: 0%"></div>
+                            <div class="prediction-display">
+                                <div class="prediction-badge" id="prediction-badge">
+                                    <i class="fa-solid fa-robot"></i>
+                                    <span id="prediction-text">N/A</span>
                                 </div>
-                                <div class="meter-value" id="conf-text">0%</div>
+                            </div>
+                            <div class="stat-detail">DistilBERT text classifier</div>
+                        </div>
+
+                        <!-- Sources Count -->
+                        <div class="stat-card-v2">
+                            <div class="stat-card-header">
+                                <i class="fa-solid fa-globe"></i>
+                                <span>Sources Analyzed</span>
+                            </div>
+                            <div class="sources-count">
+                                <span class="count-number" id="source-count">0</span>
+                                <span class="count-label">web sources</span>
+                            </div>
+                            <div class="stat-detail">DuckDuckGo live retrieval</div>
+                        </div>
+                    </div>
+
+                    <!-- AI Reasoning Panel -->
+                    <div class="reasoning-panel" id="reasoning-panel">
+                        <div class="reasoning-header">
+                            <div class="reasoning-title">
+                                <i class="fa-solid fa-brain"></i>
+                                <h3>AI Agent Reasoning</h3>
+                            </div>
+                            <span class="reasoning-badge">Gemini 2.0 Flash</span>
+                        </div>
+                        <div class="reasoning-body" id="reasoning-body">
+                            <p>No reasoning available.</p>
+                        </div>
+                    </div>
+
+                    <!-- Evidence Cards -->
+                    <div class="evidence-section" id="evidence-section">
+                        <div class="evidence-header">
+                            <div class="evidence-title">
+                                <i class="fa-solid fa-newspaper"></i>
+                                <h3>Corroborating Evidence</h3>
+                            </div>
+                            <span class="badge" id="evidence-count">0 Sources</span>
+                        </div>
+                        <div class="evidence-grid" id="evidence-grid">
+                            <div class="evidence-empty">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <p>No live corroboration performed.</p>
                             </div>
                         </div>
                     </div>
 
-                    <div class="grid-details">
-                        <!-- Evidence Panel -->
-                        <div class="panel evidence-panel">
-                            <div class="panel-header">
-                                <h3>Corroborating Evidence</h3>
-                                <span class="badge" id="evidence-count">0 Sources</span>
-                            </div>
-                            <div class="table-container">
-                                <table class="data-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Source Domain</th>
-                                            <th>Headline Match</th>
-                                            <th>Credibility</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="evidence-list">
-                                        <!-- JS Additions -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+                    <!-- Actions -->
+                    <div class="report-actions">
+                        <button id="new-analysis-btn" class="btn btn-primary">
+                            <i class="fa-solid fa-plus"></i> New Analysis
+                        </button>
+                        <button id="export-pdf-btn" class="btn btn-secondary">
+                            <i class="fa-solid fa-download"></i> Export Report
+                        </button>
                     </div>
 
                 </div>

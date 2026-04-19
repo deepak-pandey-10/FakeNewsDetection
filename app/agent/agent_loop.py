@@ -44,7 +44,8 @@ async def run_agent(text=None, url=None, mode="both"):
         final_decision = refine_decision(
             prediction,
             confidence,
-            evidence
+            evidence,
+            original_text=text
         )
 
     # Step 6: Structured output
