@@ -1,9 +1,5 @@
---extra-index-url https://download.pytorch.org/whl/cpu
-
 fastapi>=0.110.0
 uvicorn[standard]>=0.29.0
-transformers>=4.40.0
-torch
 requests
 huggingface_hub
 pypdf>=3.17.0

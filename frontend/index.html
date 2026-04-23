@@ -47,10 +47,6 @@
                 <h3>System Status</h3>
                 <div class="status-indicator">
                     <span class="dot online"></span>
-                    <span>DistilBERT Engine Online</span>
-                </div>
-                <div class="status-indicator">
-                    <span class="dot online"></span>
                     <span>Gemini Agent Online</span>
                 </div>
             </div>
@@ -61,7 +57,7 @@
             <div class="container">
                 
                 <header class="page-header">
-                    <h1>Fact Verification</h1>
+                    <h1>News Verification</h1>
                     <p>Enter text or a URL below to cross-reference claims against trusted sources and our ML models.</p>
                 </header>
 
@@ -92,12 +88,9 @@
                             </div>
                         </div>
 
-                        <div class="form-actions-dual">
-                            <button type="button" id="fact-btn" class="btn btn-primary fact-mode">
-                                <i class="fa-solid fa-robot"></i> Fact Verification
-                            </button>
-                            <button type="button" id="news-btn" class="btn btn-secondary news-mode">
-                                <i class="fa-solid fa-microchip"></i> News Verification
+                        <div class="form-actions">
+                            <button type="button" id="fact-btn" class="btn btn-primary fact-mode" style="width: 100%;">
+                                <i class="fa-solid fa-bolt"></i> Start AI News Verification
                             </button>
                         </div>
                     </form>
@@ -110,9 +103,8 @@
                         <h3>Processing Request...</h3>
                     </div>
                     <div class="log-console">
-                        <div class="log-line">Initializing sequence classification...</div>
-                        <div class="log-line">Tokenizing input text...</div>
-                        <div class="log-line">Running DistilBERT inference (attention layer mapping)...</div>
+                        <div class="log-line">Initializing API sequence...</div>
+                        <div class="log-line">Analyzing input text tokens...</div>
                         <div class="log-line">Querying trusted source databases...</div>
                         <div class="log-line pending">Synthesizing final verdict... <span class="cursor">_</span></div>
                     </div>
@@ -160,19 +152,19 @@
                             <div class="stat-detail" id="conf-label">Awaiting analysis...</div>
                         </div>
 
-                        <!-- ML Prediction -->
+                        <!-- AI Confidence -->
                         <div class="stat-card-v2">
                             <div class="stat-card-header">
                                 <i class="fa-solid fa-microchip"></i>
-                                <span>ML Prediction</span>
+                                <span>Verification Method</span>
                             </div>
                             <div class="prediction-display">
                                 <div class="prediction-badge" id="prediction-badge">
-                                    <i class="fa-solid fa-robot"></i>
-                                    <span id="prediction-text">N/A</span>
+                                    <i class="fa-solid fa-cloud"></i>
+                                    <span id="prediction-text">API ONLY</span>
                                 </div>
                             </div>
-                            <div class="stat-detail">DistilBERT text classifier</div>
+                            <div class="stat-detail">Gemini 2.0 Flash reasoning</div>
                         </div>
 
                         <!-- Sources Count -->

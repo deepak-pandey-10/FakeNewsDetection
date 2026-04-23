@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // UI Elements
     const textInput = document.getElementById('text');
     const factBtn = document.getElementById('fact-btn');
-    const newsBtn = document.getElementById('news-btn');
     const loadingUI = document.getElementById('loading');
     const resultsUI = document.getElementById('results');
     const errorUI = document.getElementById('error-container');
@@ -18,7 +17,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const gaugeFill = document.getElementById('gauge-fill');
     const gaugeValue = document.getElementById('gauge-value');
     const confLabel = document.getElementById('conf-label');
-    const predBadge = document.getElementById('prediction-badge');
     const predText = document.getElementById('prediction-text');
     const sourceCount = document.getElementById('source-count');
     const evidenceCount = document.getElementById('evidence-count');
@@ -61,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function saveToHistory(text, data) {
         const history = JSON.parse(localStorage.getItem('truthguard_history') || '[]');
-        history.unshift({ text: text.substring(0, 80), prediction: data.prediction || 'N/A', timestamp: new Date().toISOString() });
+        history.unshift({ text: text.substring(0, 80), prediction: data.prediction || 'API ONLY', timestamp: new Date().toISOString() });
         if (history.length > 20) history.pop();
         localStorage.setItem('truthguard_history', JSON.stringify(history));
     }
@@ -94,10 +92,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('export-pdf-btn')?.addEventListener('click', () => window.print());
 
     // Click Handlers
-    factBtn.addEventListener('click', () => triggerAnalysis('both'));
-    newsBtn.addEventListener('click', () => triggerAnalysis('news'));
+    factBtn?.addEventListener('click', () => triggerAnalysis());
 
-    async function triggerAnalysis(mode) {
+    async function triggerAnalysis() {
         const activeTab = document.querySelector('.sidebar-section li.active').id;
         
         let fetchUrl = '/api/analyze';
@@ -113,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             historyLabel = textValue;
             options.headers = { 'Content-Type': 'application/json' };
-            options.body = JSON.stringify({ text: textValue, mode: mode });
+            options.body = JSON.stringify({ text: textValue });
         } else if (activeTab === 'tab-url') {
             const urlValue = document.getElementById('url').value;
             if (!urlValue.trim()) {
@@ -124,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const fullUrl = urlValue.startsWith('http') ? urlValue : 'https://' + urlValue;
             historyLabel = fullUrl;
             options.headers = { 'Content-Type': 'application/json' };
-            options.body = JSON.stringify({ url: fullUrl, mode: mode });
+            options.body = JSON.stringify({ url: fullUrl });
         } else if (activeTab === 'tab-doc') {
             const fileInput = document.getElementById('file');
             if (!fileInput.files.length) {
@@ -137,15 +134,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const formData = new FormData();
             formData.append('file', fileInput.files[0]);
             options.body = formData;
-            // Native fetch will auto-set the correct Content-Type for FormData
         }
 
         // Reset UI
         resultsUI.classList.add('hidden');
         errorUI.classList.add('hidden');
         loadingUI.classList.remove('hidden');
-        factBtn.disabled = true;
-        newsBtn.disabled = true;
+        if (factBtn) factBtn.disabled = true;
 
         try {
             const response = await fetch(fetchUrl, options);
@@ -154,31 +149,27 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok || data.error) throw new Error(data.error || 'Request failed');
 
             saveToHistory(historyLabel, data);
-            renderReport(data, mode);
+            renderReport(data);
         } catch (err) {
             errorMsg.textContent = err.message;
             errorUI.classList.remove('hidden');
             loadingUI.classList.add('hidden');
         } finally {
-            factBtn.disabled = false;
-            newsBtn.disabled = false;
+            if (factBtn) factBtn.disabled = false;
         }
     }
 
-    function renderReport(data, mode) {
+    function renderReport(data) {
         loadingUI.classList.add('hidden');
         resultsUI.classList.remove('hidden');
 
-        const newsData = data.news_verification || { prediction: 'N/A', confidence: '0' };
         const factData = data.fact_verification || { agent_verdict: 'N/A', evidence: [] };
-        const prediction = newsData.prediction;
         const factResult = factData.agent_verdict || '';
         const evidence = factData.evidence || [];
 
         // ─── 1. Hero Verdict ───
         let heroClass, heroIcon, heroLabel, heroSummary;
 
-        // Check for UNVERIFIED first (Gemini unavailable)
         if (factResult.includes('UNVERIFIED')) {
             heroClass = 'verdict-warning';
             heroIcon = 'fa-shield-halved';
@@ -199,24 +190,6 @@ document.addEventListener('DOMContentLoaded', () => {
             heroIcon = 'fa-triangle-exclamation';
             heroLabel = 'MISLEADING';
             heroSummary = 'This claim may be misleading or contains suspicious patterns.';
-        } else if (mode === 'news') {
-            // News-only mode: use ML prediction
-            if (prediction === 'Real') {
-                heroClass = 'verdict-safe';
-                heroIcon = 'fa-circle-check';
-                heroLabel = 'LIKELY REAL';
-                heroSummary = 'The ML model classifies this writing style as genuine news.';
-            } else if (prediction === 'Fake') {
-                heroClass = 'verdict-danger';
-                heroIcon = 'fa-circle-xmark';
-                heroLabel = 'LIKELY FAKE';
-                heroSummary = 'The ML model detects misinformation writing patterns.';
-            } else {
-                heroClass = 'verdict-neutral';
-                heroIcon = 'fa-circle-question';
-                heroLabel = 'INCONCLUSIVE';
-                heroSummary = 'Unable to determine classification.';
-            }
         } else {
             heroClass = 'verdict-neutral';
             heroIcon = 'fa-circle-question';
@@ -230,33 +203,14 @@ document.addEventListener('DOMContentLoaded', () => {
         verdictSummary.textContent = heroSummary;
         verdictTimestamp.textContent = new Date().toLocaleString();
 
-        // ─── 2. Confidence Gauge ───
-        const confRaw = parseFloat(newsData.confidence) || 0;
-        const confPercent = confRaw > 1 ? confRaw : confRaw * 100;
-        const arcLength = 157; // SVG arc circumference
-        const offset = arcLength - (confPercent / 100) * arcLength;
+        // ─── 2. Confidence Gauge (Static 100% since it's API reasoning) ───
+        gaugeValue.textContent = `100%`;
+        gaugeFill.style.strokeDashoffset = 0;
+        gaugeFill.style.stroke = 'var(--success)';
+        confLabel.textContent = 'API Reasoning Active';
 
-        gaugeValue.textContent = `${confPercent.toFixed(1)}%`;
-        gaugeFill.style.strokeDashoffset = offset;
-
-        // Color the gauge based on value
-        if (confPercent >= 70) {
-            gaugeFill.style.stroke = 'var(--success)';
-            confLabel.textContent = 'High confidence';
-        } else if (confPercent >= 40) {
-            gaugeFill.style.stroke = 'var(--warning)';
-            confLabel.textContent = 'Moderate confidence';
-        } else {
-            gaugeFill.style.stroke = 'var(--danger)';
-            confLabel.textContent = prediction === 'N/A' ? 'ML model not used' : 'Low confidence';
-        }
-
-        // ─── 3. ML Prediction Badge ───
-        predText.textContent = prediction;
-        predBadge.className = 'prediction-badge ' + (
-            prediction === 'Real' ? 'badge-real' :
-            prediction === 'Fake' ? 'badge-fake' : 'badge-na'
-        );
+        // ─── 3. ML Prediction Badge (Reused for API status) ───
+        predText.textContent = 'API ONLY';
 
         // ─── 4. Source Count ───
         sourceCount.textContent = evidence.length;
@@ -267,7 +221,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (factResult && factResult !== 'N/A' && !factResult.includes('Analysis not requested')) {
             reasoningPanel.classList.remove('hidden');
             
-            // Update badge based on whether Gemini was used
             if (factResult.includes('API quota exceeded') || factResult.includes('UNVERIFIED')) {
                 if (reasoningBadge) reasoningBadge.textContent = '⚠ Fallback Mode';
                 if (reasoningBadge) reasoningBadge.style.background = 'rgba(245, 158, 11, 0.15)';
@@ -278,7 +231,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (reasoningBadge) reasoningBadge.style.color = '';
             }
             
-            // Format the reasoning nicely
             let formattedReasoning = factResult
                 .replace(/\[VERIFIED\]/g, '✅ VERIFIED')
                 .replace(/\[FAKE\]/g, '❌ FAKE')
@@ -287,9 +239,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 .replace(/\[Likely Real\]/g, '✅ Likely Real')
                 .replace(/\[Investigation Req\]/g, '🔍 Investigation Required');
             reasoningBody.textContent = formattedReasoning;
-        } else if (mode === 'news') {
-            reasoningPanel.classList.remove('hidden');
-            reasoningBody.textContent = `Linguistic analysis complete. The DistilBERT model classified this content as "${prediction}" with ${confPercent.toFixed(1)}% confidence. Factual web retrieval was not performed in this mode.`;
         } else {
             reasoningPanel.classList.add('hidden');
         }
@@ -300,7 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
             evidenceGrid.innerHTML = `
                 <div class="evidence-empty">
                     <i class="fa-solid fa-magnifying-glass"></i>
-                    <p>${mode === 'news' ? 'Web corroboration not performed in News Verification mode.' : 'No web evidence was found for this claim.'}</p>
+                    <p>No web evidence was found for this claim.</p>
                 </div>`;
         } else {
             evidence.forEach(ev => {
@@ -329,7 +278,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // Smooth scroll to results
         resultsUI.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 });
